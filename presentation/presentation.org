@@ -1,0 +1,230 @@
+#+TITLE: 城市与郊区的能量平衡\\
+#+TITLE: Urban and Suburban Energy Balance
+#+AUTHOR: 地球和空间科学学院 \nbsp{} 大气科学专业\\
+#+AUTHOR: 崔延宣 (PB13007115)\\
+#+AUTHOR: 指导老师： 袁仁民 \nbsp{} 副教授
+#+EMAIL: cyx95@mail.ustc.edu.cn
+#+DATE: June 8, 2017
+
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:
+
+#+STARTUP: beamer
+#+STARTUP: oddeven
+
+#+LaTeX_CLASS: beamer
+#+latex_class_options: [bigger]
+#+LaTeX_HEADER: \usepackage{xeCJK}
+#+LaTeX_HEADER: \usepackage{minted}
+#+LaTeX_HEADER: \usepackage{color}
+#+OPTIONS: H:2 toc:t
+
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+COLUMNS: %20ITEM %13BEAMER_env(Env) %6BEAMER_envargs(Args) %4BEAMER_col(Col) %7BEAMER_extra(Extra)
+
+#+BEAMER_HEADER: \AtBeginSection[]{
+#+BEAMER_HEADER: \begin{frame}<beamer>\frametitle{Outline}\tableofcontents[currentsection]\end{frame}
+#+BEAMER_HEADER: \subsection{}
+#+BEAMER_HEADER: }
+
+* 实验介绍
+** 实验介绍
+   #+caption: 中科大站 (USTC) 与科学岛站 (HFCAS) 的地理位置
+   [[file:resources/map_edited.pdf]]
+* 数据处理
+** 晴天阴天判断
+   - 计算晴天总辐射通量密度理论值 (PVLIB Python)
+   - 定义：
+     \begin{equation*}
+     \alpha = R / T
+     \end{equation*}
+     其中，\(R\) 是一天里总辐射通量密度的观测值，\(T\) 是一天里总辐射通量密度的理论值
+     - \alpha > 0.7 晴天
+     - \alpha < 0.3 阴天
+** 数据清洗
+   - 去除 NaN
+   - 统一采样存储频率
+   - 校正科学岛短波辐射数据
+   - 时间同步
+   - 去除野点
+** 时间同步与数据校正
+   #+caption: 向下短波辐射通量密度 (DSR) 原始数据
+   [[file:resources/raw_DSR.pdf]]
+** 时间同步与数据校正
+   #+caption: 2016/05/25 至 2016/05/26 DSR 原始数据
+   [[file:resources/20160525_DSR_raw.pdf]]
+** 时间同步与数据校正
+   #+caption: 2016/05/25 至 2016/05/26 经过修正之后的 DSR
+   [[file:resources/20160525_DSR.pdf]]
+** 时间同步与数据校正
+   #+caption: 修正之后的 DSR
+   [[file:resources/DSR.pdf]]
+** 野点值去除
+   #+caption: 潜热通量密度 (LE) 原始数据
+   [[file:resources/raw_LE.pdf]]
+** 野点值去除
+   - 大气运动过程连续
+   - 物理量相邻两个时刻的差值服从正态分布
+   - 3 \sigma 原则
+   #+begin_src python
+def clean_LE(df, n):
+    df.loc[(df['LE_irga'] > 500) |
+           (df['LE_irga'] < -200), 'LE_irga'] = np.nan
+    for i in range(n):
+        sigma = df['LE_irga'].diff().std()
+        mask = df['LE_irga'].diff().abs() > 3*sigma
+        df.loc[mask, 'LE_irga'] = np.nan
+    return df
+   #+end_src
+** 野点值去除
+   #+caption: 去除野点后的 LE
+   [[file:resources/LE.pdf]]
+** 野点值去除
+   #+caption: 科学岛站 $CO_2$ 浓度原始数据
+   [[file:resources/raw_CO2.pdf]]
+** 野点值去除
+   #+caption: 科学岛站去除野点后的 $CO_2$ 浓度
+   [[file:resources/CO2.pdf]]
+** 向上短波辐射 (USR) 突增现象
+   #+caption: 两地向上短波辐射通量密度 USR
+   [[file:resources/USR_edited.pdf]]
+** 向上短波辐射 (USR) 突增现象
+   #+caption: 2016/01/28 至 2016/02/06 USR
+   [[file:resources/20160201_USR.pdf]]
+** 向上短波辐射 (USR) 突增现象
+   #+caption: 2016/01/28 至 2016/02/06 DSR
+   [[file:resources/20160201_DSR.pdf]]
+** 向上短波辐射 (USR) 突增现象
+   #+caption: 2016/02/01 合肥大雪新闻
+   [[file:resources/Screenshot_20170421_152703.png]]
+** 向上短波辐射 (USR) 突增现象
+   #+caption: 2016/01/28 至 2016/02/06 反照率
+   [[file:resources/20160201_albedo.pdf]]
+* 数据分析
+** 辐射通量密度与辐射收支
+\begin{equation*}
+  R_n = R_{s}\downarrow - R_{s}\uparrow + R_{l}\downarrow - R_{l}\uparrow
+\end{equation*}
+其中 \(R_n\) 为净辐射通量密度，\(R_{s}\downarrow\)，\(R_{s}\uparrow\) 分别为向下、向上短波辐射通量密度，
+\(R_{l}\downarrow\)，\(R_{l}\uparrow\) 分别为向下、向上长波辐射通量密度。
+** 向下短波辐射通量密度
+   #+caption: 2016/04/26 至 2016/04/30 向下短波辐射通量密度
+   [[file:resources/20160426_20160430_DSR.pdf]]
+** 向上短波辐射通量密度
+   #+caption: 2016/04/26 至 2016/04/30 向上短波辐射通量密度
+   [[file:resources/20160426_20160430_USR.pdf]]
+** 反照率
+   #+caption: 2016/04/26 至 2016/04/30 反照率
+   [[file:resources/20160426_20160430_albedo.pdf]]
+** 向下长波辐射通量密度
+   #+caption: 2016/01/21 至 2016/01/26 向下长波辐射通量密度
+   [[file:resources/20160121_20160126_DLR.pdf]]
+** 相对湿度
+   #+caption: 2016/01/21 至 2016/01/26 相对湿度
+   [[file:resources/20160121_20160126_RH_high.pdf]]
+** 向上长波辐射通量密度与温度
+   #+caption: 2016/04/26 至 2016/04/30 两地向上长波辐射通量密度 (实线) 与温度 (虚线)
+   #+attr_latex: :width .85\linewidth
+   [[file:resources/20160426_20160430_Rl_Ta.pdf]]
+** 辐射通量密度与辐射收支
+   Stefan-Boltzmann 定律:
+\begin{equation*}
+  F = \sigma T^4
+\end{equation*}
+其中，\(F\) 为辐射通量密度，\(\sigma\) 为 Stefan-Boltzmann 常数 \(5.67\times10^{-8}Wm^{-2}K^{-4}\)，
+\(T\) 为温度。
+** 辐射通量密度与辐射收支
+   #+caption: 2015 年 12 月科学岛站 ULR 观测值与理论值
+   [[file:resources/20151201_20151231_ULR_Theory_HFCAS.pdf]]
+** 辐射通量密度与辐射收支
+   #+caption: 2015 年 11 月至 2016 年 5 月半月平均辐射通量密度
+   [[file:resources/sms_R.pdf]]
+** 感热通量密度
+   #+caption: 2015 年 11 月至 2016 年 6 月感热通量密度
+   [[file:resources/Hs.pdf]]
+** 感热通量密度
+   #+caption: 2016/04/29 至 2016/05/05 感热通量密度
+   [[file:resources/20160429_20160505_Hs.pdf]]
+** 感热通量密度
+   #+caption: 中科大站与科学岛站感热通量密度比较 (单位：W/m^2)
+   |------------------------+------------------------+--------+------------------------+--------|
+   |                        | 中科大站               |        | 科学岛站               |        |
+   |------------------------+------------------------+--------+------------------------+--------|
+   |                        | 均值                   | 标准差 | 均值                   | 标准差 |
+   |------------------------+------------------------+--------+------------------------+--------|
+   | 全部                   | 30.4                   |   60.8 | 19.7                   |   48.5 |
+   | \textcolor{red}{晴天}  | \textcolor{red}{50.3}  |   85.2 | \textcolor{red}{32.1}  |   63.4 |
+   | \textcolor{red}{阴天}  | \textcolor{red}{11.2}  |   19.5 | \textcolor{red}{6.9}   |   22.0 |
+   | \textcolor{blue}{白天} | \textcolor{blue}{64.6} |   72.2 | \textcolor{blue}{47.1} |   57.1 |
+   | \textcolor{blue}{夜晚} | \textcolor{blue}{-1.4} |   14.2 | \textcolor{blue}{-5.5} |   13.9 |
+   | 晴天白天               | 105.9                  |   88.7 | 73.4                   |   66.7 |
+   | 阴天白天               | 17.9                   |   22.4 | 14.3                   |   22.7 |
+   | 晴天夜晚               | -6.7                   |   14.9 | -9.5                   |   10.8 |
+   | 阴天夜晚               | 5.3                    |   14.3 | 0.5                    |   19.2 |
+   |------------------------+------------------------+--------+------------------------+--------|
+** 潜热通量密度
+   #+caption: 2016/02/15 至 2016/02/19 潜热通量密度
+   [[file:resources/20160215_20160219_LE.pdf]]
+** 相对湿度
+   #+caption: 2016/02/15 至 2016/02/19 相对湿度
+   [[file:resources/20160215_20160219_RH.pdf]]
+** 潜热通量密度
+   #+caption: 中科大站与科学岛站潜热通量密度比较 (单位：W/m^2)
+   |------------------------+------------------------+--------+------------------------+--------|
+   |                        | 中科大站               |        | 科学岛站               |        |
+   |------------------------+------------------------+--------+------------------------+--------|
+   |                        | 均值                   | 标准差 | 均值                   | 标准差 |
+   |------------------------+------------------------+--------+------------------------+--------|
+   | 全部                   | 20.9                   |   36.8 | 28.4                   |   47.4 |
+   | \textcolor{red}{晴天}  | \textcolor{red}{31.1}  |   44.7 | \textcolor{red}{46.2}  |   61.8 |
+   | \textcolor{red}{阴天}  | \textcolor{red}{16.1}  |   41.1 | \textcolor{red}{14.2}  |   39.4 |
+   | \textcolor{blue}{白天} | \textcolor{blue}{34.4} |   42.2 | \textcolor{blue}{51.6} |   54.7 |
+   | \textcolor{blue}{夜晚} | \textcolor{blue}{8.1}  |   25.0 | \textcolor{blue}{7.3}  |   25.2 |
+   | 晴天白天               | 54.2                   |   51.5 | 83.2                   |   67.0 |
+   | 阴天白天               | 20.9                   |   41.6 | 22.8                   |   42.4 |
+   | 晴天夜晚               | 7.0                    |   13.4 | 8.8                    |   19.0 |
+   | 阴天夜晚               | 11.9                   |   40.3 | 6.9                    |   35.1 |
+   |------------------------+------------------------+--------+------------------------+--------|
+** 城市与郊区的储热
+   能量平衡方程:
+\begin{equation*}
+  R_n + Q = H_s + LE + G_s + \Delta S
+\end{equation*}
+\begin{equation*}
+  R_n = H_s + LE + \Delta S'
+\end{equation*}
+其中 \(\Delta S\) 与 \(\Delta S'\) 的关系：
+\begin{equation*}
+  \Delta S = \Delta S' - G_s + Q
+\end{equation*}
+** 城市与郊区的储热
+   #+caption: 城市与郊区的储热
+   [[file:resources/dS.pdf]]
+** 城市与郊区的储热
+   #+caption: 城市与郊区储热的半月平均值
+   [[file:resources/dS_sms.pdf]]
+** 城市与郊区的储热
+   #+caption: 城市与郊区储热的半月平均值 (考虑冬季供暖)
+   [[file:resources/dS_Q.pdf]]
+** 能量不平衡现象
+   - 下垫面不均匀性，水平方向能量输送
+   - 现有方法测量感热、潜热可能偏低
+   - 忽略向土壤中输送的热
+* 结论
+** 结论
+   - 城市热岛效应
+   - 感热、潜热（城市/郊区、晴天/阴天、白天/夜晚）
+   - 城市、郊区储热，人为热
+   - 能量平衡/能量不平衡
+* 参考文献
+** 参考文献
+   - Liou K N. An Introduction to Atmospheric Radiation[M]. Second edition. [S.l.]: Academic Press, 2002.
+   - Wallace J M, Hobbs P V. Atmospheric Science (Second Edition)[M/OL]. Second edition. San Diego: Academic Press, 2006. http://www.sciencedirect.com/science/article/pii/B9780127329512500016. DOI: https://doi.org/10.1016/B978-0-12-732951-2.50001-6.
+   - 佟华, 刘辉志, 桑建国, 等. 城市人为热对北京热环境的影响[J]. 气候与环境研究. 2004, 9 (3): 409–421.
+** 参考文献（续）
+   - Holmgren W F, Mueller B, Andrews R W, et al. pvlib/pvlib-python[EB/OL]. 2017. https://github.com/pvlib/pvlib-python.
+   - Ineichen P, Perez R. A new airmass independent formulation for the linke turbidity coefficient[J/OL]. Solar Energy. 2002, 73 (3): 151-157. https://archive-ouverte.unige.ch/unige:17184.
+   - Ineichen P. A broadband simplified version of the solis clear sky model[J/OL]. Solar Energy. 2008, 82 (8): 758 - 762. http://www.sciencedirect.com/science/article/pii/S0038092X08000406. DOI: https://doi.org/10.1016/j.solener.2008.02.009.

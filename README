@@ -1,0 +1,13 @@
+本科毕业论文：城市与郊区的能量平衡
+
+目录结构
+
+  Workspace
+    数据处理、绘图用到的 Python 程序。
+  presentation
+    答辩幻灯片，使用 Emacs org-mode 编写，此目录下包含源码以及生成的 pdf。
+  thesis
+    毕业论文，使用 LaTex 编写，源码以及生成的 pdf 放在此目录。
+
+
+All Rights Reserved.
